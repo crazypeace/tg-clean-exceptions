@@ -1,3 +1,4 @@
+import time
 from telethon import TelegramClient
 from telethon.tl.functions.channels import EditBannedRequest
 from telethon.tl.types import ChannelParticipantsBanned, ChatBannedRights
