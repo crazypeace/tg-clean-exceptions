@@ -31,6 +31,7 @@ async def main():
     removed_count = 0
     checked_count = 0
 
+    # 遍历Exceptions列表
     async for p in client.iter_participants(entity, filter=ChannelParticipantsBanned, limit=None):
         time.sleep(0.5)  # 避免向telegram服务器发送命令过快
         
