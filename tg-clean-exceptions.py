@@ -3,6 +3,7 @@ from telethon import TelegramClient
 from telethon.tl.functions.channels import EditBannedRequest
 from telethon.tl.types import ChannelParticipantsBanned, ChatBannedRights
 
+
 # 到这里申请 https://my.telegram.org/apps
 api_id = 12345678
 api_hash = 'f9847f9847f9847f9847f9847f984747'
@@ -34,9 +35,20 @@ async def main():
     # 遍历Exceptions列表
     async for p in client.iter_participants(entity, filter=ChannelParticipantsBanned, limit=None):
         time.sleep(0.5)  # 避免向telegram服务器发送命令过快
-        
+
         checked_count += 1
-        
+
+        # 检查用户是否已销号
+        if p.deleted:
+            print(f"🗑️ 检测到 Deleted Account: {p.id}，正在清理...")
+            try:
+                await client(EditBannedRequest(entity, p.id, ChatBannedRights(until_date=None)))  # 清除例外项
+            except Exception as e:
+                print(f"⚠️ 清理 {uid} 时出错: {e}")
+                continue
+            removed_count += 1
+            continue
+
         # 获取 Exceptions 中设置了什么权限
         rights = getattr(p.participant, 'banned_rights', None)
         if not isinstance(rights, ChatBannedRights):
@@ -55,7 +67,7 @@ async def main():
         else:
             print(f"✅ 保留: {p.id} ({p.first_name or ''} {p.last_name or ''})（权限不同）")
 
-    print(f"\n完成检查，共检查 {checked_count} 条 Exception，清理 {removed_count} 条无效 Exception")
+    print(f"\n完成检查，共检查 {checked_count} 条 Exception，清理 {removed_count} 条 Exception")
 
 with client:
     client.loop.run_until_complete(main())
